@@ -1,9 +1,10 @@
 import { Request, Response, Router } from "express";
 import { isEmpty, validate } from "class-validator";
-import { User } from "../entities/User";
+import User from "../entities/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
+import auth from "../middleware/auth";
 
 const register = async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
@@ -59,7 +60,7 @@ const login = async (req: Request, res: Response) => {
 
     //store token as user cookie
 
-    const token = jwt.sign({ username }, "ewuofj34h234iu23n");
+    const token = jwt.sign({ username }, process.env.JWT_SECRET);
 
     //set cookie
     //set header
@@ -67,7 +68,7 @@ const login = async (req: Request, res: Response) => {
       "Set-Cookie",
       cookie.serialize("token", token, {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 3600,
         path: "/",
@@ -75,13 +76,37 @@ const login = async (req: Request, res: Response) => {
     );
 
     //send response
-    return res.json({ user, token });
+    return res.json(user);
   } catch (err) {}
+};
+
+//takes their token, gives back user data
+const me = (_: Request, res: Response) => {
+  return res.json(res.locals.user);
+};
+
+//log-out function
+const logout = (_: Request, res: Response) => {
+  res.set(
+    "Set-Cookie",
+    cookie.serialize("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(0),
+      path: "/",
+    })
+  );
+
+  return res.status(200).json({ success: true });
 };
 
 //adding routes
 const router = Router();
 router.post("/register", register);
 router.post("/login", login);
+//me and logout users auth middleware
+router.get("/me", auth, me);
+router.get("/logout", auth, logout);
 
 export default router;

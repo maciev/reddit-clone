@@ -5,6 +5,7 @@ import { createConnection } from "typeorm";
 import authRoutes from "./routes/auth";
 import dotenv from "dotenv";
 import trim from "./middleware/trim";
+import cookieParser from "cookie-parser";
 
 //connect to db using psql, drop tables, delete freom uesres, select * from users, -U postgres, \d \dt c\
 
@@ -15,6 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(trim);
+app.use(cookieParser());
 
 app.get("/", (req, res) => res.send("Hello world"));
 app.use("/api/auth", authRoutes);
