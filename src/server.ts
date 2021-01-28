@@ -3,6 +3,8 @@ import express, { response } from "express";
 import morgan from "morgan";
 import { createConnection } from "typeorm";
 import authRoutes from "./routes/auth";
+import postRoutes from "./routes/posts";
+
 import dotenv from "dotenv";
 import trim from "./middleware/trim";
 import cookieParser from "cookie-parser";
@@ -12,6 +14,7 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(morgan("dev"));
@@ -20,9 +23,10 @@ app.use(cookieParser());
 
 app.get("/", (req, res) => res.send("Hello world"));
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
-app.listen(5001, async () => {
-  console.log("Server running at http://localhost:5001");
+app.listen(PORT, async () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 
   try {
     await createConnection();
