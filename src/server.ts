@@ -1,9 +1,10 @@
 import "reflect-metadata";
-import express, { response } from "express";
+import express from "express";
 import morgan from "morgan";
 import { createConnection } from "typeorm";
 import authRoutes from "./routes/auth";
 import postRoutes from "./routes/posts";
+import subRoutes from "./routes/subs";
 
 import dotenv from "dotenv";
 import trim from "./middleware/trim";
@@ -21,9 +22,10 @@ app.use(morgan("dev"));
 app.use(trim);
 app.use(cookieParser());
 
-app.get("/", (req, res) => res.send("Hello world"));
+app.get("/", (_, res) => res.send("Hello world"));
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/subs", subRoutes);
 
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
